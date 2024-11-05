@@ -1,0 +1,40 @@
+---
+# roles/registry/tasks/uninstall.yml
+
+- name: Stop Docker registry container
+  docker_container:
+    name: "{{ registry.service_name }}"
+    state: absent
+  become: true
+
+- name: Remove registry data directory
+  file:
+    path: "{{ registry.data_dir }}"
+    state: absent
+  become: true
+
+- name: Remove registry configuration file
+  file:
+    path: "{{ registry.config_file }}"
+    state: absent
+  become: true
+
+- name: Remove registry hostname entry from /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ registry.server_ip }} {{ registry.hostname }}"
+    state: absent
+  become: true
+
+- name: Remove registry hostname from Docker daemon configuration
+  lineinfile:
+    path: /etc/docker/daemon.json
+    line: '"insecure-registries": ["{{ registry.hostname }}:{{ registry.port }}"]'
+    state: absent
+  become: true
+
+- name: Restart Docker service to apply changes
+  systemd:
+    name: docker
+    state: restarted
+  become: true

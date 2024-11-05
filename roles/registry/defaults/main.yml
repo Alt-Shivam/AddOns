@@ -1,0 +1,6 @@
+registry:
+  hostname: "internal.orgname.io"
+  port: 5043
+  data_dir: "/var/lib/registry"  # Location to store image data
+  service_name: "docker-registry"
+  config_file: "/etc/docker/registry/config.yml"

@@ -1,0 +1,9 @@
+---
+
+- name: install addon/registry
+  import_tasks: roles/registry/tasks/install.yml
+  tags: install
+
+- name: uninstall addon/registry
+  import_tasks: roles/registry/tasks/uninstall.yml
+  tags: uninstall

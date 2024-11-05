@@ -1,0 +1,6 @@
+---
+- name: Install Docker Registry
+  hosts: master_nodes
+  become: true
+  roles:
+    - registry

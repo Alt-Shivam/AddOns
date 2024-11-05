@@ -1,0 +1,4 @@
+registry:
+  hostname: "internal.orgname.io"
+  port: 5043
+  server_ip: "192.168.1.100"  # IP address of the registry server

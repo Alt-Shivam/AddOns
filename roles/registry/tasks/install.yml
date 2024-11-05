@@ -1,0 +1,73 @@
+---
+# roles/registry/tasks/install.yml
+
+- name: Install Docker if not present
+  apt:
+    name: docker.io
+    state: present
+  become: true
+
+- name: Ensure Docker service is running
+  systemd:
+    name: docker
+    state: started
+    enabled: true
+  become: true
+
+- name: Create Docker registry data directory
+  file:
+    path: "{{ registry.data_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Create Docker registry configuration directory
+  file:
+    path: "{{ registry.config_file | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Configure Docker registry
+  template:
+    src: config.yml.j2
+    dest: "{{ registry.config_file }}"
+    mode: '0644'
+  become: true
+
+- name: Run Docker registry container
+  docker_container:
+    name: "{{ registry.service_name }}"
+    image: registry:2
+    ports:
+      - "{{ registry.port }}:5000"
+    volumes:
+      - "{{ registry.data_dir }}:/var/lib/registry"
+      - "{{ registry.config_file }}:/etc/docker/registry/config.yml"
+    restart_policy: always
+  become: true
+
+- name: Add registry hostname to Docker daemon
+  lineinfile:
+    path: /etc/docker/daemon.json
+    line: '"insecure-registries": ["{{ registry.hostname }}:{{ registry.port }}"]'
+    create: yes
+    state: present
+  become: true
+
+- name: Restart Docker service
+  systemd:
+    name: docker
+    state: restarted
+  become: true
+
+- name: Add registry hostname to /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ registry.server_ip }} {{ registry.hostname }}"
+    state: present
+  become: true
