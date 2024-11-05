@@ -1,10 +1,15 @@
 ---
 # roles/registry/tasks/install.yml
 
-- name: Install Docker if not present
+- name: Ensure pip is installed
   apt:
-    name: docker.io
+    name: python3-pip
     state: present
+  become: true
+
+- name: Install Docker SDK for Python
+  pip:
+    name: docker
   become: true
 
 - name: Ensure Docker service is running
@@ -51,15 +56,14 @@
     restart_policy: always
   become: true
 
-- name: Add registry hostname to Docker daemon
-  lineinfile:
-    path: /etc/docker/daemon.json
-    line: '"insecure-registries": ["{{ registry.hostname }}:{{ registry.port }}"]'
-    create: yes
-    state: present
+- name: Configure Docker daemon with insecure registry
+  template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    mode: '0644'
   become: true
 
-- name: Restart Docker service
+- name: Restart Docker service to apply daemon changes
   systemd:
     name: docker
     state: restarted
@@ -68,6 +72,6 @@
 - name: Add registry hostname to /etc/hosts
   lineinfile:
     path: /etc/hosts
-    line: "{{ registry.server_ip }} {{ registry.hostname }}"
+    line: "{{ ansible_default_ipv4.address }} {{ registry.hostname }}"
     state: present
   become: true

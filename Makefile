@@ -25,8 +25,8 @@ registry-uninstall: registry-docker-uninstall
 
 #### c. Provision registry ####
 registry-docker-install:
-	ansible-playbook -i $(HOSTS_INI_FILE) $(ADDON_ROOT_DIR)/deploy_docker.yml --tags install \
+	ansible-playbook -i $(HOSTS_INI_FILE) $(ADDON_ROOT_DIR)/install_registry.yml --tags install \
 		--extra-vars "ROOT_DIR=$(ROOT_DIR)" --extra-vars $(EXTRA_VARS)
 registry-docker-uninstall:
-	ansible-playbook -i $(HOSTS_INI_FILE) $(ADDON_ROOT_DIR)/deploy_docker.yml --tags uninstall \
+	ansible-playbook -i $(HOSTS_INI_FILE) $(ADDON_ROOT_DIR)/install_registry.yml --tags uninstall \
 		--extra-vars "ROOT_DIR=$(ROOT_DIR)" --extra-vars $(EXTRA_VARS)
